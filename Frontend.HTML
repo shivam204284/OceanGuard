@@ -1,0 +1,841 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Mavericks | Marine Debris AI</title>
+
+    <style>
+        :root {
+            --background: #07131f;
+            --panel: #0d2030;
+            --border: #214054;
+            --text: #e9f7ff;
+            --muted: #91adbf;
+            --cyan: #42d9f5;
+            --green: #63e6a3;
+            --yellow: #ffd071;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--background);
+            color: var(--text);
+            font-family: Arial, sans-serif;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 230px 1fr;
+            min-height: 100vh;
+        }
+
+        aside {
+            background: #06101a;
+            padding: 25px 16px;
+            border-right: 1px solid var(--border);
+        }
+
+        .brand {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 35px;
+        }
+
+        .brand span {
+            color: var(--cyan);
+        }
+
+        nav a {
+            display: block;
+            padding: 12px;
+            margin: 5px 0;
+            color: var(--muted);
+            text-decoration: none;
+            border-radius: 7px;
+        }
+
+        nav a:hover {
+            background: #102b3e;
+            color: white;
+        }
+
+        main {
+            padding: 28px;
+            min-width: 0;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        h2 {
+            font-size: 15px;
+            margin-top: 0;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .status {
+            background: #10352e;
+            color: var(--green);
+            padding: 9px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .metric,
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .metric small {
+            color: var(--muted);
+        }
+
+        .metric strong {
+            display: block;
+            font-size: 26px;
+            margin-top: 10px;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            gap: 18px;
+        }
+
+        .sonar {
+            height: 300px;
+            background: #041019;
+            border: 1px solid #255166;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .detection-box {
+            position: absolute;
+            border: 2px solid var(--green);
+            background: #63e6a315;
+            width: 90px;
+            height: 65px;
+            top: 35%;
+            left: 28%;
+        }
+
+        .detection-box span {
+            position: absolute;
+            top: -24px;
+            left: -2px;
+            background: var(--green);
+            color: #07131f;
+            font-size: 11px;
+            padding: 4px;
+            white-space: nowrap;
+        }
+
+        .detection-box.second {
+            left: 65%;
+            top: 60%;
+            border-color: var(--yellow);
+            background: #ffd07115;
+        }
+
+        .detection-box.second span {
+            background: var(--yellow);
+        }
+
+        button,
+        select,
+        .upload-label {
+            background: #10354a;
+            color: white;
+            border: 1px solid #2c596f;
+            border-radius: 7px;
+            padding: 10px 13px;
+            cursor: pointer;
+            margin: 5px 3px 0 0;
+        }
+
+        button:hover,
+        .upload-label:hover {
+            background: #15506b;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .detection-card {
+            padding: 13px;
+            background: #091a28;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            margin-bottom: 12px;
+        }
+
+        .detection-card h3 {
+            margin: 0 0 10px;
+            font-size: 15px;
+        }
+
+        .detection-card p {
+            margin: 6px 0;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .lower {
+            margin-top: 18px;
+        }
+
+        .telemetry {
+            background: #06121c;
+            padding: 14px;
+            border-radius: 8px;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+            font-size: 12px;
+        }
+
+        .message {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 12px;
+        }
+
+        @media (max-width: 950px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            aside {
+                display: none;
+            }
+
+            .metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            main {
+                padding: 16px;
+            }
+        }
+
+        @media (max-width: 450px) {
+            .metrics {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .metric strong {
+                font-size: 21px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="layout">
+
+    <aside>
+        <div class="brand">MAVERICKS <span>◉</span></div>
+
+        <nav>
+            <a href="#dashboard">Mission Dashboard</a>
+            <a href="#sonar-section">Sonar Visualization</a>
+            <a href="#detections">AI Detections</a>
+            <a href="#targets">Cleanup Targets</a>
+            <a href="#telemetry">Telemetry</a>
+        </nav>
+
+        <hr style="border-color:#214054; margin:25px 0;">
+
+        <p class="muted">MARINE DEBRIS AI</p>
+        <p class="muted">Prototype Dashboard</p>
+    </aside>
+
+    <main id="dashboard">
+
+        <header>
+            <div>
+                <h1>Marine Debris AI</h1>
+                <p class="muted">
+                    Intelligent underwater debris detection and monitoring
+                </p>
+            </div>
+
+            <div class="status" id="connectionStatus">
+                DEMO MODE
+            </div>
+        </header>
+
+        <!-- METRICS -->
+
+        <section class="metrics">
+
+            <div class="metric">
+                <small>Frames Processed</small>
+                <strong id="frames">0</strong>
+            </div>
+
+            <div class="metric">
+                <small>Debris Detections</small>
+                <strong id="totalDetections">2</strong>
+            </div>
+
+            <div class="metric">
+                <small>False Positives Rejected</small>
+                <strong id="falsePositives">0</strong>
+            </div>
+
+            <div class="metric">
+                <small>Inference Time</small>
+                <strong id="inference">-- ms</strong>
+            </div>
+
+        </section>
+
+        <div class="content">
+
+            <!-- SONAR -->
+
+            <section class="panel" id="sonar-section">
+
+                <h2>UNDERWATER SONAR VISUALIZATION</h2>
+
+                <div class="sonar">
+
+                    <canvas id="sonarCanvas"></canvas>
+
+                    <div id="detectionBoxes">
+
+                        <div class="detection-box">
+                            <span>GHOST NET</span>
+                        </div>
+
+                        <div class="detection-box second">
+                            <span>PIPE</span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <button id="refreshButton">
+                    Refresh Dashboard
+                </button>
+
+                <button id="toggleButton">
+                    Toggle Detection Boxes
+                </button>
+
+                <label class="upload-label" for="sonarImage">
+                    Upload Sonar Image
+                </label>
+
+                <input
+                    type="file"
+                    id="sonarImage"
+                    accept="image/png,image/jpeg,image/webp"
+                >
+
+                <p id="uploadMessage" class="message">
+                    Sonar visualization is simulated.
+                </p>
+
+            </section>
+
+            <!-- DETECTIONS -->
+
+            <section class="panel" id="detections">
+
+                <h2>AI DETECTION RESULTS</h2>
+
+                <div id="detectionList">
+
+                    <div class="detection-card">
+                        <h3>Ghost Net</h3>
+                        <p>Confidence: 94%</p>
+                        <p>Status: Requires verification</p>
+                        <p>Priority: High</p>
+                    </div>
+
+                    <div class="detection-card">
+                        <h3>Metal Pipe</h3>
+                        <p>Confidence: 87%</p>
+                        <p>Status: Under review</p>
+                        <p>Priority: Medium</p>
+                    </div>
+
+                </div>
+
+                <h2 style="margin-top:25px;">AI PROCESSING PIPELINE</h2>
+
+                <p class="muted">
+                    Sonar Input → Image Preprocessing → AI Detection
+                    → Object Classification → Verification → Cleanup
+                </p>
+
+            </section>
+
+        </div>
+
+        <!-- CLEANUP TARGETS -->
+
+        <section class="panel lower" id="targets">
+
+            <h2>MARINE DEBRIS CLEANUP MANAGEMENT</h2>
+
+            <p class="muted">
+                Select a debris detection to create a cleanup task.
+            </p>
+
+            <label for="priority">Cleanup Priority:</label>
+
+            <select id="priority">
+                <option value="low">Low</option>
+                <option value="normal" selected>Normal</option>
+                <option value="high">High</option>
+            </select>
+
+            <button id="queueButton">
+                Queue Cleanup Task
+            </button>
+
+            <button id="exportButton">
+                Export Detection Data
+            </button>
+
+            <p id="cleanupMessage" class="message"></p>
+
+        </section>
+
+        <!-- TELEMETRY -->
+
+        <section class="panel lower" id="telemetry">
+
+            <h2>BACKEND TELEMETRY</h2>
+
+            <pre id="telemetryData" class="telemetry">Demo mode active.</pre>
+
+            <p class="message">
+                Demo values are illustrative and are not real-world
+                measurements or navigation coordinates.
+            </p>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script>
+    /*
+     * Set API_BASE to the URL of your FastAPI backend.
+     * Example: http://127.0.0.1:8000
+     */
+    const API_BASE = "http://127.0.0.1:8000";
+
+    const demoDetections = [
+        {
+            id: "MD-001",
+            class_name: "Ghost Net",
+            confidence: 0.94,
+            verification_status: "review",
+            priority: "high"
+        },
+        {
+            id: "MD-002",
+            class_name: "Metal Pipe",
+            confidence: 0.87,
+            verification_status: "review",
+            priority: "normal"
+        }
+    ];
+
+    let detections = [...demoDetections];
+    let framesProcessed = 0;
+    let showBoxes = true;
+    let apiConnected = false;
+
+    const $ = id => document.getElementById(id);
+
+    // Draw a simulated sonar visualization.
+
+    function drawSonar() {
+        const canvas = $("sonarCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const rect = canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+
+        const width = canvas.width;
+        const height = canvas.height;
+
+        ctx.fillStyle = "#041019";
+        ctx.fillRect(0, 0, width, height);
+
+        // Simulated sonar noise.
+
+        for (let i = 0; i < 1000; i++) {
+            const x = Math.random() * width;
+            const y = Math.random() * height;
+            const alpha = Math.random() * 0.4;
+
+            ctx.fillStyle = `rgba(100,210,230,${alpha})`;
+
+            ctx.fillRect(
+                x,
+                y,
+                Math.random() * 4 + 1,
+                Math.random() * 3 + 1
+            );
+        }
+
+        // Sonar grid.
+
+        ctx.strokeStyle = "rgba(66,217,245,0.18)";
+        ctx.lineWidth = 1;
+
+        for (let y = 0; y < height; y += height / 6) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(width, y);
+            ctx.stroke();
+        }
+
+        for (let x = 0; x < width; x += width / 8) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, height);
+            ctx.stroke();
+        }
+
+        ctx.fillStyle = "#42d9f5";
+        ctx.font = `${12 * dpr}px Arial`;
+
+        ctx.fillText(
+            "SIMULATED SIDE-SCAN SONAR",
+            12 * dpr,
+            22 * dpr
+        );
+    }
+
+    // Render detection cards.
+
+    function renderDetections(items) {
+        detections = items;
+
+        const container = $("detectionList");
+
+        if (!items.length) {
+            container.innerHTML =
+                '<p class="muted">No detections available.</p>';
+
+            return;
+        }
+
+        container.innerHTML = items.map(item => `
+            <div class="detection-card">
+                <h3>${escapeHTML(item.class_name || "Unknown Object")}</h3>
+
+                <p>
+                    Confidence:
+                    ${Math.round((item.confidence || 0) * 100)}%
+                </p>
+
+                <p>
+                    Status:
+                    ${escapeHTML(item.verification_status || "Unknown")}
+                </p>
+
+                <p>
+                    Priority:
+                    ${escapeHTML(item.priority || "normal")}
+                </p>
+
+                <p>
+                    Detection ID:
+                    ${escapeHTML(item.id || "N/A")}
+                </p>
+            </div>
+        `).join("");
+
+        $("totalDetections").textContent = items.length;
+    }
+
+    // Avoid inserting raw API data into HTML.
+
+    function escapeHTML(value) {
+        return String(value).replace(/[&<>"']/g, char => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        })[char]);
+    }
+
+    // Connect the dashboard to FastAPI.
+
+    async function loadDashboard() {
+        try {
+            const response = await fetch(
+                `${API_BASE}/api/v1/dashboard/summary`
+            );
+
+            if (!response.ok) {
+                throw new Error("Backend returned an error.");
+            }
+
+            const summary = await response.json();
+
+            $("frames").textContent =
+                summary.frames_processed ?? 0;
+
+            $("totalDetections").textContent =
+                summary.detections_total ?? 0;
+
+            $("falsePositives").textContent =
+                summary.false_positives_rejected ?? 0;
+
+            $("inference").textContent =
+                `${summary.inference_ms ?? "--"} ms`;
+
+            apiConnected = true;
+
+            $("connectionStatus").textContent = "API CONNECTED";
+
+            $("telemetryData").textContent =
+                JSON.stringify(summary, null, 2);
+
+            await loadDetections();
+
+        } catch (error) {
+            apiConnected = false;
+
+            $("connectionStatus").textContent = "DEMO MODE";
+
+            $("telemetryData").textContent = JSON.stringify({
+                mode: "demo",
+                backend: "unavailable",
+                api: API_BASE,
+                message: error.message
+            }, null, 2);
+
+            // Keep the demonstration dashboard usable offline.
+
+            $("frames").textContent = framesProcessed;
+            $("totalDetections").textContent = detections.length;
+            $("falsePositives").textContent = 0;
+            $("inference").textContent = "-- ms";
+
+            renderDetections(demoDetections);
+        }
+    }
+
+    async function loadDetections() {
+        const response = await fetch(
+            `${API_BASE}/api/v1/detections`
+        );
+
+        if (!response.ok) {
+            throw new Error("Could not load detections.");
+        }
+
+        const result = await response.json();
+
+        renderDetections(
+            Array.isArray(result) ? result : result.items || []
+        );
+    }
+
+    // Refresh dashboard.
+
+    $("refreshButton").addEventListener("click", async () => {
+        framesProcessed++;
+        drawSonar();
+        await loadDashboard();
+    });
+
+    // Show or hide simulated detection boxes.
+
+    $("toggleButton").addEventListener("click", () => {
+        showBoxes = !showBoxes;
+
+        $("detectionBoxes").style.display =
+            showBoxes ? "block" : "none";
+    });
+
+    // Upload an image to the demo inference endpoint.
+
+    $("sonarImage").addEventListener("change", async event => {
+        const file = event.target.files[0];
+
+        if (!file) {
+            return;
+        }
+
+        if (!apiConnected) {
+            $("uploadMessage").textContent =
+                "Start the backend before uploading an image.";
+
+            return;
+        }
+
+        const formData = new FormData();
+
+        formData.append("file", file);
+
+        $("uploadMessage").textContent = "Uploading image...";
+
+        try {
+            const response = await fetch(
+                `${API_BASE}/api/v1/inference/demo`,
+                {
+                    method: "POST",
+                    body: formData
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Image upload failed.");
+            }
+
+            const result = await response.json();
+
+            $("uploadMessage").textContent =
+                result.message || "Image uploaded successfully.";
+
+            await loadDashboard();
+
+        } catch (error) {
+            $("uploadMessage").textContent = error.message;
+        }
+    });
+
+    // Queue a cleanup task for a selected detection.
+
+    $("queueButton").addEventListener("click", async () => {
+        if (!detections.length) {
+            $("cleanupMessage").textContent =
+                "There are no detections to queue.";
+
+            return;
+        }
+
+        if (!apiConnected) {
+            $("cleanupMessage").textContent =
+                "Cleanup task creation requires the backend.";
+
+            return;
+        }
+
+        const selected = detections[0];
+
+        try {
+            const response = await fetch(
+                `${API_BASE}/api/v1/cleanup/tasks`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        detection_id: selected.id,
+                        priority: $("priority").value,
+                        notes: "Created from Mavericks dashboard"
+                    })
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Could not create cleanup task.");
+            }
+
+            const result = await response.json();
+
+            $("cleanupMessage").textContent =
+                `Cleanup task created: ${result.task_id || "Success"}`;
+
+        } catch (error) {
+            $("cleanupMessage").textContent = error.message;
+        }
+    });
+
+    // Export current detections to JSON.
+
+    $("exportButton").addEventListener("click", () => {
+        const blob = new Blob(
+            [JSON.stringify(detections, null, 2)],
+            { type: "application/json" }
+        );
+
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = "marine-debris-detections.json";
+
+        link.click();
+
+        URL.revokeObjectURL(url);
+    });
+
+    window.addEventListener("resize", drawSonar);
+
+    // Initialize dashboard.
+
+    drawSonar();
+    loadDashboard();
+</script>
+
+</body>
+</html>
+```
